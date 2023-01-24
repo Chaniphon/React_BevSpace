@@ -1,0 +1,92 @@
+import React , {useEffect, useState, useRef}from "react";
+import { GoogleMap, LoadScript, Marker, StandaloneSearchBox } from '@react-google-maps/api';
+
+function MapInfo() {
+  let [centertest, setCenter ] = useState({
+    lat: 0,
+    lng: 0
+  })
+
+  const inputRef = useRef();
+
+  const containerStyle = {
+    width: '100%',
+    height: '400px'
+  };
+  const zoom = 15;
+
+  useEffect(  () => {
+    async function getLocation(){
+      if (navigator.geolocation) {
+            // console.log("waiting");
+          navigator.geolocation.getCurrentPosition(showPosition);
+          } else {
+            console.log("reconnected")
+          }
+        }
+        getLocation();
+    },[MapInfo]);
+
+    function showPosition(position) {
+            console.log("new Latitude: " + position.coords.latitude + 
+            "Longitude: " + position.coords.longitude);
+            setCenter({
+              lat:  position.coords.latitude,
+              lng:  position.coords.longitude,
+            })
+    }
+    
+    const handlePlaceChanged = () => { 
+      const [ place ] = inputRef.current.getPlaces();
+      if(place) {
+        setCenter({
+          lat:  place.geometry.location.lat(),
+          lng:  place.geometry.location.lng(),
+        }) 
+          console.log(place.formatted_address)
+          console.log(place.geometry.location.lat())
+          console.log(place.geometry.location.lng())
+      } 
+    }
+    
+    return(
+    <>
+    {/* <div id="root"><input ref={inputRef}></input></div> */}
+        <LoadScript
+          googleMapsApiKey="AIzaSyBg7qd4aSOs4pJS28MZLnfUmh8kcf39pw4"
+          libraries={["places"]}
+        >
+          <StandaloneSearchBox
+                className="search"
+                onLoad={ref => inputRef.current = ref}
+                onPlacesChanged={handlePlaceChanged}
+            >
+                <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search here"
+                />
+          </StandaloneSearchBox>
+
+          <GoogleMap
+            disableDefaultUI= {true}
+            mapContainerStyle={containerStyle}
+            center={centertest}
+            zoom={zoom}
+          >
+            { /* Child components, such as markers, info windows, etc. */
+            <Marker position={centertest}></Marker>
+            
+             }
+            <></>
+          </GoogleMap>
+          
+        </LoadScript></>
+    );
+}
+
+
+
+
+export default MapInfo;
+
